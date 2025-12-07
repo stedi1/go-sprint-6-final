@@ -42,7 +42,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	_, err = buf.ReadFrom(file)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// читаем данные из буфера в строку
@@ -50,7 +50,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// передаем строку в функцию определения морзе
 	result, err := service.CheckAndConvert(str)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
