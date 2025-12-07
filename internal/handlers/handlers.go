@@ -17,6 +17,12 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 
 // для "/upload"
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	// проверяем метод запроса
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST method is supported", http.StatusInternalServerError)
+		return
+	}
+
 	// парсим html-форму
 	err := r.ParseMultipartForm(1 << 20)
 	if err != nil {
@@ -26,7 +32,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// получаем файл из формы
 	file, _, err := r.FormFile("myFile")
 	if err != nil {
-		http.Error(w, "error receiving file: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "error receiving file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// закрываем файл после работы с ним
@@ -57,7 +63,11 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer dst.Close()
 	// копируем данные из строки в локальный файл
-	fmt.Fprint(dst, result)
+	if _, err = fmt.Fprint(dst, result); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	// возвращаем результат конвертации строки
-	w.Write([]byte(result))
+	if _, err = w.Write([]byte(result)); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
